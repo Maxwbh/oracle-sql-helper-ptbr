@@ -164,5 +164,3 @@ Esta skill é construída sobre o trabalho de:
 - Sete Lagoas, Minas Gerais, Brasil
 - E-mail: [maxwbh@gmail.com](mailto:maxwbh@gmail.com)
 - GitHub: [@maxwbh](https://github.com/maxwbh)
-
-Construída com auxílio de Claude (Anthropic) através de processo iterativo de auditoria contra documentação oficial Oracle, Oracle-Base, e padrões Trivadis/Insum.
