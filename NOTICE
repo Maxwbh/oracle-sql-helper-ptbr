@@ -1,0 +1,70 @@
+oracle-sql-helper-ptbr
+Copyright 2026 Maxwell da Silva Oliveira (M&S do Brasil)
+Contact: maxwbh@gmail.com
+GitHub: @maxwbh
+
+This product includes content derived from:
+
+----------------------------------------------------------------------
+Trivadis PL/SQL & SQL Coding Guidelines (version 4.4)
+Copyright (c) Trivadis AG and contributors
+Licensed under Apache License 2.0
+https://github.com/Trivadis/plsql-and-sql-coding-guidelines
+
+Original authors and major contributors:
+- Roger Troller (Trivadis)
+- Jörn Kulessa
+- Daniela Reiner
+- Richard Bushnell
+- Andreas Flubacher
+- Thomas Mauch
+- Philipp Salvisberg
+
+The Trivadis Coding Guidelines provide the foundation of naming
+conventions, prefix system, exception handling patterns, and
+overall coding philosophy applied throughout this skill.
+
+----------------------------------------------------------------------
+Insum PL/SQL & SQL Coding Guidelines (version 1.1)
+Copyright (c) Insum Solutions and contributors
+Licensed under Apache License 2.0
+https://github.com/insum-labs/plsql-and-sql-coding-guidelines
+
+Specific rules adopted from the Insum fork:
+- G-7720: Avoid triggers for business logic
+- G-7730: If using triggers, use compound triggers
+
+----------------------------------------------------------------------
+Oracle-Base
+Tim Hall
+https://oracle-base.com/
+
+The "SQL > PL/SQL" canonical principle (#0) and several patterns
+related to NOCOPY, FORALL, and PL/SQL optimization are inspired by
+articles authored by Tim Hall on Oracle-Base.
+
+----------------------------------------------------------------------
+OraOpenSource Logger
+https://github.com/OraOpenSource/Logger
+Licensed under MIT License
+
+The integration patterns shown in logger_integration.sql reference
+the Logger framework as the canonical logging solution.
+
+----------------------------------------------------------------------
+Oracle Application Express (APEX)
+Copyright (c) Oracle Corporation
+
+Templates referencing APEX_* packages, dictionary views, and patterns
+are based on the official Oracle APEX 24.2 API Reference and follow
+documented usage patterns from the Oracle APEX team.
+
+----------------------------------------------------------------------
+
+This skill is a derivative work that combines coding standards from
+the sources above, adapts them to Brazilian Portuguese (PT-BR)
+contexts, and packages them as templates and references for use
+with Anthropic's Claude AI assistant.
+
+Trademarks of Oracle Corporation, Trivadis AG, Insum Solutions, and
+other entities are the property of their respective owners.

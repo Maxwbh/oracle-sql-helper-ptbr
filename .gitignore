@@ -1,0 +1,35 @@
+# Pacotes gerados (publicados em Releases, não no repo)
+*.skill
+*.zip
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Arquivos de SO
+.DS_Store
+Thumbs.db
+
+# Arquivos temporários
+*.tmp
+*.bak
+*.log
+
+# Build / staging local
+/build/
+/dist/
+/staging/
+
+# Variáveis de ambiente locais
+.env
+.env.local
+
+# Python (caso adicione scripts de validação)
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
