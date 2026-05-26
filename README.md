@@ -153,7 +153,83 @@ oracle-devops-ptbr ←→  oracle-ords-ptbr          (ords/modules/)
 
 A skill DevOps inclui 7 scripts Python + módulo compartilhado:
 
-- Empresa: M&S do Brasil
-- Sete Lagoas, Minas Gerais, Brasil
-- E-mail: [maxwbh@gmail.com](mailto:maxwbh@gmail.com)
-- GitHub: [@maxwbh](https://github.com/maxwbh)
+```
+scripts/
+├── oracle_devops_utils.py   # shared: connect, run_sql, colors, DB_SCHEMA
+├── apply_changelog.py       # migrations (changelog.yml + db_changelog)
+├── deploy_full.py           # orquestrador changelog → APEX → ORDS
+├── deploy_db.py             # objetos banco em ordem de dependência
+├── deploy_ords.py           # módulos ORDS (security→privileges→modules)
+├── export_db.py             # DDL via DBMS_METADATA → db/
+├── export_ords.py           # schema ORDS via ORDS_EXPORT
+├── export_apex.py           # export split APEX via SQLcl
+└── requirements-devops.txt  # oracledb>=2.0.0, PyYAML>=6.0.0
+```
+
+### Deploy em schema diferente do usuário de conexão
+
+Suporte nativo a cenários DBA:
+
+```bash
+# .env
+DB_USER=admin_dba      # usuário de conexão
+DB_PASS=senha_dba
+DB_SCHEMA=ms_app       # schema alvo do deploy
+
+# oracle_devops_utils executa automaticamente:
+# ALTER SESSION SET CURRENT_SCHEMA = MS_APP
+```
+
+---
+
+## Estrutura do repositório
+
+```
+oracle-skills-ptbr/
+├── README.md
+├── CHANGELOG.md
+├── LICENSE
+├── .gitignore
+├── skills/                    # código-fonte (para contribuições)
+│   ├── oracle-plsql-ptbr/
+│   ├── oracle-apex-ptbr/
+│   ├── oracle-ords-ptbr/
+│   ├── oracle-dba-ptbr/
+│   ├── oracle-tuning-ptbr/
+│   ├── oracle-trivadis-ptbr/
+│   └── oracle-devops-ptbr/
+└── dist/                      # pacotes prontos para instalar
+    ├── oracle-plsql-ptbr.skill
+    ├── oracle-apex-ptbr.skill
+    ├── oracle-ords-ptbr.skill
+    ├── oracle-dba-ptbr.skill
+    ├── oracle-tuning-ptbr.skill
+    ├── oracle-trivadis-ptbr.skill
+    └── oracle-devops-ptbr.skill
+```
+
+---
+
+## Publicar no GitHub
+
+```bash
+# Extrair o ZIP
+unzip oracle-skills-ptbr-v3.1.0-git.zip
+
+cd oracle-skills-ptbr
+git init
+git add .
+git commit -m "feat: oracle-skills-ptbr v3.1.0 — 7 skills stack Oracle completa"
+git remote add origin https://github.com/maxwbh/oracle-skills-ptbr.git
+git push -u origin main
+
+git tag -a v3.1.0 -m "7 skills + devops Python oracledb v3.1.0"
+git push origin v3.1.0
+```
+
+---
+
+## Licença
+
+MIT — veja [LICENSE](./LICENSE)  
+Copyright © 2026 Maxwell da Silva Oliveira — M&S do Brasil LTDA

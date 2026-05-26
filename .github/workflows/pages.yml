@@ -1,5 +1,15 @@
 # .github/workflows/pages.yml
-# Publica docs/ como GitHub Pages a cada push na main
+# Publica docs/ no branch gh-pages a cada push na main
+# M&S do Brasil LTDA — contato@msbrasil.inf.br
+#
+# Usa peaceiris/actions-gh-pages — mais estável e sem dependência
+# de actions/configure-pages que pode falhar com erros de SHA.
+#
+# Configuração única no GitHub (só precisa fazer uma vez):
+#   Repo → Settings → Pages → Source: Deploy from a branch
+#   Branch: gh-pages  /  Folder: / (root)
+# ─────────────────────────────────────────────────────────────────────────────
+
 name: GitHub Pages
 
 on:
@@ -8,25 +18,24 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
+  contents: write
 
 jobs:
   deploy:
+    name: Publicar GitHub Pages
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v4
-      - uses: actions/upload-pages-artifact@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy para gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: docs/
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
+          commit_message: "docs: atualiza landing page [${{ github.sha }}]"
+          force_orphan: true          # branch gh-pages sempre limpo
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
