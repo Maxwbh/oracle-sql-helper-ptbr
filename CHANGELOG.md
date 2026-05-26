@@ -1,80 +1,176 @@
 # Changelog
 
-Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
+Histórico completo de versões do repositório `oracle-skills-ptbr`.  
+Formato: [Semantic Versioning](https://semver.org/) — `MAJOR.MINOR.PATCH`
 
-O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
-e este projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
+---
 
-## [v6] — 2026-04-30
+## [3.1.0] — 2026-05-26
 
-### Adicionado
-- Princípio canônico **#9**: Triggers não contêm regra de negócio
-- Princípio canônico **#10**: Quando usar trigger, sempre compound trigger
-- Princípio canônico **#11**: EBR para mudanças de schema com zero downtime
-- Template novo: `assets/triggers_canonicos.sql` (compound trigger pattern, audit triggers, surrogate keys, cross-edition triggers para EBR, 7 anti-patterns documentados)
-- Reference nova: `references/ebr-editioning-views.md` (Edition-Based Redefinition, editioning views, cross-edition triggers, procedimento canônico de deploy)
-- Gatilhos da skill incluem agora: `compound trigger`, `EBR`, `edition`, `editioning view`, `cross-edition trigger`, `trigger pra auditar`, `deploy sem downtime`
+### oracle-devops-ptbr v3.1.0
 
-### Modificado
-- `assets/README.md` atualizado para incluir `triggers_canonicos.sql` na seção PL/SQL
-- `SKILL.md` description expandida para mencionar EBR como nova área coberta
+**Fix arquitetural — suporte a deploy via DBA em schema diferente**
 
-### Inspirado em
-- Adoção pontual de regras Insum G-7720 e G-7730 (triggers sem business logic, compound triggers obrigatórios)
-- Mantém base Trivadis 4.4 — não migra para naming Insum (`co_` em vez de `k_`, `p_` para todos parâmetros)
+Problema: scripts usavam `USER_*` views que só enxergam o schema do usuário conectado, causando falha silenciosa quando `DB_USER != DB_SCHEMA` (ex: DBA conectado deployando em `ms_app`).
 
-## [v5] — 2026-03
+**Correções:**
 
-### Modificado
-- **Inversão completa de naming inglês → PT-BR** em todos os 21 templates e 5 references
-- Mapeamento PT-BR aplicado: `customers→clientes`, `invoices→faturas`, `documents→documentos`, `payments→pagamentos`, `users→usuarios`, `employees→funcionarios`, `event_log→log_eventos`, `audit_log→log_auditoria`, `process_queue→fila_processamento`, `created_at/by→criado_em/por`, `atualizado_em/por`, `ativo`, `excluido_em`
-- Status values em PT-BR: `PENDENTE`, `PAGO`, `CANCELADO`, `ATIVO`, `PROCESSADO`, `VENCIDO`, `ALERTA`
-- Naming code: `gc_nome_pacote`, `lc_nome_unidade`, `l_qtd`, `l_total`, `l_status_atual`, `l_id_fatura`, `l_id_cliente`, `t_lista_ids`, `r_resumo`, `co_faturas_pendentes`, `e_estado_invalido`, `p_id_fatura`
-- APEX items: `P10_ID_CLIENTE`, `P10_NOME_CLIENTE`, `P10_TOTAL_DEVIDO`, etc.
+- `oracle_devops_utils.py`
+  - Nova variável `DB_SCHEMA` no config — schema alvo do deploy (opcional, default: `DB_USER`)
+  - `conectar()`: executa `ALTER SESSION SET CURRENT_SCHEMA = DB_SCHEMA` automaticamente quando `DB_SCHEMA != DB_USER`
+  - Nova função `schema_efetivo(conn)` — retorna `SYS_CONTEXT('USERENV','CURRENT_SCHEMA')`
 
-### Mantido em inglês
-- Keywords SQL/PL/SQL (BEGIN, END, EXCEPTION, BULK COLLECT, MERGE INTO, etc.)
-- Pacotes Oracle nativos (DBMS_*, UTL_*, OWA_*, APEX_*)
-- Bind variables sistema (:APP_USER, :APP_SESSION)
-- Hints (/*+ APPEND */, /*+ PARALLEL */)
-- Prefixos Trivadis (g_, gc_, l_, lc_, p_, r_, t_, co_, e_)
+- `apply_changelog.py` + `create-changelog-table.sql`
+  - `USER_TABLES` → `ALL_TABLES WHERE owner = SYS_CONTEXT('USERENV','CURRENT_SCHEMA')`
+  - Funciona independentemente de qual usuário está conectado
 
-## [v4] — 2026-03
+- `deploy_ords.py`
+  - Verificação pós-deploy: tenta `DBA_ORDS_MODULES WHERE schema = :schema` (ORDS 24.4+)
+  - Fallback para `USER_ORDS_MODULES` (funciona após `ALTER SESSION SET CURRENT_SCHEMA`)
 
-### Adicionado
-- Princípio canônico **#0**: SQL puro antes de PL/SQL (princípio Tim Hall via Oracle-Base)
-- Princípio canônico **#8**: NOCOPY para LOBs e collections grandes em IN OUT/OUT
-- Template novo: `assets/dml_alternatives_to_plsql.sql` (MERGE em vez de loop, DBMS_ERRLOG em vez de FORALL SAVE EXCEPTIONS, multitable INSERT, External Tables, INSERT SELECT com APPEND/PARALLEL)
-- Template novo: `assets/nocopy_for_lobs.sql` (NOCOPY hint para BLOB/CLOB > 100KB, cenário de PDF pages 15/49)
-- Anti-patterns expandidos: 21 → 33
+- `references/git-project-structure-ptbr.md`
+  - Documentação de `DB_SCHEMA` no `.env.example`
+  - Seção "Schema alvo vs usuário de conexão"
 
-### Modificado
-- Auditoria rigorosa contra Oracle-Base (Tim Hall) e documentação Oracle oficial
-- 7 anti-slop cases (era 5)
+---
 
-## [v3] — 2026-03
+## [3.0.0] — 2026-05-26
 
-### Adicionado
-- 5 templates novos em assets/
-- 7 princípios canônicos formalizados
-- 12 operações de risco documentadas
-- 21 antipatterns com correções
+### oracle-devops-ptbr v3.0.0 — Breaking
 
-### Modificado
-- Auditoria rigorosa contra documentação Oracle 19c oficial
+**Migração completa para Python + oracledb Thin Mode**
 
-## [v2] — 2026-03
+Todos os scripts shell foram migrados para Python. Os `.sh` viram thin wrappers (`exec python3 script.py "$@"`).
 
-### Adicionado
-- Integração com Logger (OraOpenSource) — `assets/logger_integration.sql`
-- DBMS_ASSERT em endpoints ORDS para proteção SQL injection
-- APEX_BACKGROUND_PROCESS específico para APEX 24.2 — `assets/apex_long_running_job.sql`
+**Novo módulo compartilhado:**
+- `oracle_devops_utils.py` — `conectar()`, `executar_arquivo_sql()`, `split_oracle_sql()`, `checksum_sha256()`, `banner()`, cores, logging
 
-## [v1] — 2026-03
+**Scripts Python adicionados:**
+- `deploy_full.py` — orquestrador: changelog → APEX → ORDS (com `--skip-db/apex/ords`)
+- `deploy_db.py` — deploy ordenado: sequences → types → tables → package specs → bodies → triggers
+- `deploy_ords.py` — security → privileges → módulos (verifica `USER_ORDS_MODULES` pós-deploy)
+- `export_db.py` — `DBMS_METADATA.GET_DDL()` → estrutura `db/` com extensões `.pks/.pkb/.vw/.trg`
+- `export_ords.py` — `ORDS_EXPORT.export_schema()` como CLOB nativo via oracledb
+- `export_apex.py` — export split APEX via SQLcl subprocess + backup automático + `install.sql`
 
-### Adicionado
-- Versão inicial da skill
-- 16 templates SQL cobrindo PL/SQL, APEX, ORDS, DBA, performance
-- 5 references com conceitos e padrões
-- 8 princípios canônicos iniciais
-- Padrão Trivadis 4.4 como base
+**`apply_changelog.py` refatorado:**
+- Remove duplicações com `oracle_devops_utils`
+- Importa todas as funções compartilhadas do utils
+
+**`github-deploy.yml` atualizado:**
+- Etapa ORDS usa `deploy_ords.py`
+- Smoke test inclui `apply_changelog.py --status`
+
+---
+
+## [2.3.0] — 2026-05-26
+
+### oracle-devops-ptbr v2.3.0
+
+- `apply_changelog.py` — implementação Python completa com `oracledb` + `PyYAML`
+  - CLI: `--env`, `--dry-run`, `--status`, `--project-root`
+  - Checksum SHA-256 via `hashlib` (sem dependência de `sha256sum`)
+  - Confirmação `"CONFIRMO PROD"` para ambiente de produção
+  - Cores no terminal (desativadas automaticamente em CI sem TTY)
+  - Detecção de integridade (arquivo alterado após aplicação)
+- `apply-changelog.sh` → thin wrapper que chama o Python
+- `requirements-devops.txt` — `oracledb>=2.0.0`, `PyYAML>=6.0.0`
+- `github-deploy.yml` — etapa banco usa `apply_changelog.py`
+
+---
+
+## [2.2.0] — 2026-05-26
+
+### oracle-devops-ptbr v2.2.0
+
+**Sistema de Changelog do banco**
+
+- `changelog_template.yml` — template para `db/changelog.yml`; regras, tipos (`ddl|dml|fix`), exemplos
+- `create-changelog-table.sql` — DDL idempotente de `db_changelog` com `checksum`, `duracao_ms`, `ambiente`
+- `apply-changelog.sh` — lê `changelog.yml`, aplica via SQLcl, registra com SHA-256, fail-fast, detecção de drift
+- `references/git-project-structure-ptbr.md` — seção 11: sistema de changelog, tabela de comportamentos, workflow completo
+
+---
+
+## [2.1.0] — 2026-05-26
+
+### oracle-devops-ptbr v2.1.0
+
+- `export-db.sh` — extrai DDL completo do schema via `DBMS_METADATA.GET_DDL()`
+  - Packages separados em `.pks` (spec) e `.pkb` (body)
+  - Remove cláusulas de storage/tablespace
+  - Detecta objetos INVÁLIDOS e avisa
+  - Suporte a tipo específico: `--tipo tables|packages|...`
+
+---
+
+## [2.0.0] — 2026-05-26
+
+### Breaking — Divisão em 7 Skills Especializadas
+
+O monolítico `oracle-sql-helper-ptbr` v1.6.0 foi dividido em 6 skills (`oracle-plsql-ptbr`, `oracle-apex-ptbr`, `oracle-ords-ptbr`, `oracle-dba-ptbr`, `oracle-tuning-ptbr`, `oracle-trivadis-ptbr`), mais a nova skill `oracle-devops-ptbr`.
+
+**Ação necessária:** desinstalar `oracle-sql-helper-ptbr` e instalar as 7 novas skills.
+
+### oracle-devops-ptbr v2.0.0 — nova skill
+
+- Estrutura canônica de projeto Oracle/APEX/ORDS no Git (`db/`, `apex/`, `ords/`, `scripts/`)
+- Padrão GMUD para nomenclatura de scripts (`001_projeto_ddl_objeto.sql`)
+- `deploy-full.sh` — orquestrador com confirmação obrigatória para prod
+- `deploy-db.sh` — deploy ordenado de objetos do banco
+- `deploy-ords.sh` — security → privileges → módulos
+- `export-apex.sh` — export split via SQLcl com backup automático
+- `export-ords.sh` — export via `ORDS_EXPORT.export_schema()`
+- `module_template.sql` — template ORDS completo (module + templates + handlers GET/POST/DELETE + privileges)
+- `github-deploy.yml` — workflow CI/CD com aprovação obrigatória para `main`
+- `gitignore-oracle.txt` — `.gitignore` para projetos Oracle
+
+### oracle-plsql-ptbr v2.0.0
+PL/SQL 19c + Trivadis 4.4 + EBR + LOBs + Logger + compound triggers.  
+9 templates SQL. 1 reference. Referência cruzada para `oracle-trivadis-ptbr`.
+
+### oracle-apex-ptbr v2.0.0
+APEX 24.2 development + Data Dictionary completo (`APEX_APPLICATION_*`, `APEX_WORKSPACE_*`, `APEX_APPL_*`).  
+6 templates SQL. 2 references (patterns + data dictionary).
+
+### oracle-ords-ptbr v2.0.0
+ORDS REST services + Data Dictionary (`USER_ORDS_*`, `DBA_ORDS_*`).  
+2 templates SQL. 2 references. Alerta depreciação `OAUTH → ORDS_SECURITY`.
+
+### oracle-dba-ptbr v2.0.0
+DBA operacional + Oracle Data Dictionary (`V$`, `GV$`, `DBA_*`, `CDB_*`, `DBA_HIST_*`).  
+3 templates SQL. 2 references. Alerta licença Diagnostics Pack.
+
+### oracle-tuning-ptbr v2.0.0
+Performance tuning — explain plan, AWR/ASH em tempo real, index strategy.  
+2 templates SQL. 1 reference.
+
+### oracle-trivadis-ptbr v2.0.0
+Trivadis Guidelines 4.4 — checklist de revisão, prefixos, naming PT-BR.  
+1 reference. Skill de revisão explícita (as demais aplicam Trivadis automaticamente).
+
+---
+
+## Histórico do monolítico oracle-sql-helper-ptbr
+
+### [1.6.0]
+- `ords-data-dictionary-ptbr.md` — `USER_ORDS_*`/`DBA_ORDS_*`, evolução 18.x→25.x, depreciação OAUTH
+
+### [1.5.0]
+- `apex-data-dictionary-ptbr.md` — hierarquia APEX_APPLICATION_*/APEX_APPL_*/APEX_WORKSPACE_*, versões 19→26.1
+
+### [1.4.0]
+- Remoção de clientes reais — autoria M&S do Brasil LTDA
+
+### [1.3.0]
+- `data-dictionary-ptbr.md` — hierarquia Oracle, matriz edição × tecnologia, evolução 11g→26ai
+
+### [1.2.0]
+- Scripts DBA estilo Tim Hall, Network ACL, APEX 24.2, Result Cache
+
+### [1.1.0]
+- Princípios #9, #10, #11 — triggers, compound trigger, EBR
+- `ebr-editioning-views.md`
+
+### [1.0.0]
+- Lançamento: PL/SQL + APEX + ORDS + DBA + Performance — 11 princípios Trivadis, 23 assets SQL

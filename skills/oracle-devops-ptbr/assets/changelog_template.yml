@@ -1,0 +1,88 @@
+# db/changelog.yml
+# Changelog de alterações do banco de dados
+# M&S do Brasil LTDA — contato@msbrasil.inf.br
+#
+# REGRAS — leia antes de editar:
+#   1. Apenas ADICIONE entradas no final. NUNCA altere ou remova entradas existentes.
+#   2. O id é permanente — once applied, always applied.
+#   3. Após aplicação, o checksum do arquivo é gravado no banco.
+#      Alterar o arquivo depois da aplicação causa erro de integridade.
+#   4. Use o formato: DB-NNN (ex: DB-001, DB-042, DB-100)
+#   5. tipos válidos: ddl | dml | fix
+#      ddl = CREATE/ALTER/DROP de objetos
+#      dml = INSERT/UPDATE/DELETE de dados de domínio
+#      fix = hotfix pontual de produção
+#
+# Workflow:
+#   1. Criar o script em db/{tipo}/alter/ ou db/data/
+#   2. Adicionar entrada aqui (no final)
+#   3. Commitar os dois arquivos juntos
+#   4. apply-changelog.sh aplica só o que ainda não foi aplicado
+#   5. Após aplicação bem-sucedida: export-db.sh atualiza o DDL atual
+# ─────────────────────────────────────────────────────────────────────────────
+
+migrations:
+
+  # ── Criação inicial de tabelas ─────────────────────────────────────────────
+
+  - id: "DB-001"
+    arquivo: "tables/tb_clientes.sql"
+    tipo: "ddl"
+    descricao: "Criar tabela tb_clientes"
+
+  - id: "DB-002"
+    arquivo: "tables/tb_tipos_cliente.sql"
+    tipo: "ddl"
+    descricao: "Criar tabela tb_tipos_cliente"
+
+  # ── Carga inicial de dados de domínio ─────────────────────────────────────
+
+  - id: "DB-003"
+    arquivo: "data/001_carga_tipos_cliente.sql"
+    tipo: "dml"
+    descricao: "Carga inicial dos tipos de cliente (PF, PJ, GOV)"
+
+  # ── Sequences ─────────────────────────────────────────────────────────────
+
+  - id: "DB-004"
+    arquivo: "sequences/seq_clientes.sql"
+    tipo: "ddl"
+    descricao: "Criar sequence seq_clientes"
+
+  # ── Packages ──────────────────────────────────────────────────────────────
+
+  - id: "DB-005"
+    arquivo: "packages/pkg_clientes.pks"
+    tipo: "ddl"
+    descricao: "Package spec pkg_clientes v1"
+
+  - id: "DB-006"
+    arquivo: "packages/pkg_clientes.pkb"
+    tipo: "ddl"
+    descricao: "Package body pkg_clientes v1"
+
+  # ── Alterações incrementais ────────────────────────────────────────────────
+  # Cada alteração tem seu próprio script em alter/
+  # O DDL original em tables/ é atualizado pelo export-db.sh após aplicação
+
+  - id: "DB-007"
+    arquivo: "tables/alter/001_tb_clientes_add_col_email.sql"
+    tipo: "ddl"
+    descricao: "tb_clientes — adicionar coluna email VARCHAR2(200)"
+
+  - id: "DB-008"
+    arquivo: "tables/alter/002_tb_clientes_add_col_telefone.sql"
+    tipo: "ddl"
+    descricao: "tb_clientes — adicionar coluna telefone VARCHAR2(20)"
+
+  - id: "DB-009"
+    arquivo: "sequences/alter/001_seq_clientes_increment_10.sql"
+    tipo: "ddl"
+    descricao: "seq_clientes — alterar incremento para 10"
+
+  - id: "DB-010"
+    arquivo: "data/002_update_tipo_cliente_descricao.sql"
+    tipo: "dml"
+    descricao: "Corrigir descrição do tipo GOV para Governo"
+
+  # ── Adicionar novas entradas abaixo desta linha ────────────────────────────

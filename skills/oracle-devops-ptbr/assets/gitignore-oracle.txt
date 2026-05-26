@@ -1,0 +1,96 @@
+# oracle-devops-ptbr — .gitignore para projetos Oracle/APEX/ORDS
+# Copiar como .gitignore na raiz do projeto
+
+# ─── Credenciais e configurações locais ──────────────────────────────────────
+.env
+.env.local
+.env.*.local
+wallet/
+tnsnames.ora
+sqlnet.ora
+*.wallet
+cwallet.sso
+ewallet.p12
+
+# ─── APEX — exports monolíticos (usar split em vez disso) ────────────────────
+# Exports monolíticos geram diff inutilizável — commitar apenas split
+f[0-9]*.sql
+# Exceção: install.sql e scripts de deploy são commitados
+!apex/**/install.sql
+!apex/**/set_environment.sql
+
+# ─── APEX — arquivos temporários de export ───────────────────────────────────
+apex/workspace_export*.sql
+apex/*.bkp
+
+# ─── ORDS — exports automáticos gerados (manter apenas os versionados manualmente) ──
+ords/export_*.sql
+ords/schema_export_*.sql
+
+# ─── SQL*Plus / SQLcl ────────────────────────────────────────────────────────
+*.spl
+spool.log
+*.lst
+afiedt.buf
+login.sql
+
+# ─── Oracle SQL Developer ────────────────────────────────────────────────────
+*.jws
+*.jpr
+*.jpx
+.dbtools/
+
+# ─── Logs de deploy ──────────────────────────────────────────────────────────
+logs/
+deploy-*.log
+*.log
+!docs/**/*.log.example
+
+# ─── Scripts com senhas hardcoded (nunca commitar) ───────────────────────────
+*_with_password.sh
+*_credentials.sh
+connect_prod.sh
+
+# ─── utPLSQL — relatórios de teste gerados ───────────────────────────────────
+tests/reports/
+*.junit.xml
+!tests/**/*.xml.example
+
+# ─── Newman / Postman ────────────────────────────────────────────────────────
+tests/api/reports/
+newman-report*.json
+newman-report*.html
+
+# ─── macOS ───────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+._*
+
+# ─── Windows ─────────────────────────────────────────────────────────────────
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ─── Editores ────────────────────────────────────────────────────────────────
+.vscode/settings.json
+.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+
+# ─── Python (se usar scripts Python auxiliares) ──────────────────────────────
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ─── Node (se usar Newman CLI localmente) ────────────────────────────────────
+node_modules/
+npm-debug.log*
+
+# ─── GitHub Actions — artefatos locais de teste ──────────────────────────────
+.act/

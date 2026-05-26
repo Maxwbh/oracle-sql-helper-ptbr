@@ -1,164 +1,157 @@
-# oracle-sql-helper-ptbr
+# oracle-skills-ptbr
 
-Skill em português brasileiro para [Claude](https://claude.ai) focada em desenvolvimento Oracle 19c, seguindo padrões **Trivadis Coding Guidelines 4.4**.
+**Skills Claude para Oracle — Stack Completa em Português**
 
-Versão atual: **v6** (abril 2026)
+7 Skills do Claude cobrindo toda a stack Oracle (PL/SQL, APEX, ORDS, DBA, Performance, Trivadis Guidelines e DevOps/CI-CD), desenvolvidas pela **M&S do Brasil LTDA** para uso profissional em projetos Oracle 19c + APEX 24.2 + ORDS.
 
-## O que é uma "skill"?
+---
 
-Skills são pacotes de instruções, templates e references que estendem o comportamento do Claude para domínios específicos. Ao instalar esta skill, o Claude passa a:
+## Desenvolvedor
 
-- Aplicar padrões Trivadis 4.4 automaticamente em todo código PL/SQL gerado
-- Usar convenção de naming PT-BR (variáveis, tabelas, comentários) com prefixos Trivadis em inglês
-- Sugerir templates prontos para os cenários mais comuns
-- Reconhecer anti-patterns clássicos e propor correções
+**Maxwell da Silva Oliveira**  
+M&S do Brasil LTDA — [msbrasil.inf.br](https://msbrasil.inf.br)  
+✉ contato@msbrasil.inf.br · 🐙 [@maxwbh](https://github.com/maxwbh)
 
-## Áreas cobertas
+---
 
-| Área | Reference | Templates |
-|---|---|---|
-| **PL/SQL** (Trivadis 4.4) | `references/plsql-trivadis-guidelines.md` | 9 templates (packages, exceptions, BULK, NOCOPY, CLOB/BLOB, Logger, triggers canônicos) |
-| **APEX 24.2** | `references/apex-patterns.md` | 6 templates (Dynamic Action, pagination, Page Process, Background Process, Interactive Grid, BLOB upload/download) |
-| **ORDS** | `references/ords-rest-services.md` | 2 templates (module + handler) |
-| **DBA operacional** | `references/dba-operations.md` | 3 templates (Flashback, sessões travadas, recompile inválidos) |
-| **Performance** | `references/performance-tuning.md` | 2 templates (EXPLAIN PLAN workflow, estratégias de índice) |
-| **EBR** (zero downtime) | `references/ebr-editioning-views.md` | (conceitual — usa templates PL/SQL existentes em editions) |
+## Skills disponíveis
 
-## Princípios canônicos
+| Skill | Versão | Escopo | Tamanho |
+|---|---|---|---|
+| `oracle-plsql-ptbr` | 2.0.0 | PL/SQL 19c, packages, LOBs, EBR, triggers, Logger | 35K |
+| `oracle-apex-ptbr` | 2.0.0 | APEX 24.2 development + Data Dictionary completo | 36K |
+| `oracle-ords-ptbr` | 2.0.0 | ORDS REST services + Data Dictionary (USER/DBA_ORDS_*) | 19K |
+| `oracle-dba-ptbr` | 2.0.0 | DBA operacional + Oracle Data Dictionary (V$, DBA_*, CDB_*) | 24K |
+| `oracle-tuning-ptbr` | 2.0.0 | Performance tuning, AWR, ASH, explain plan, indexes | 17K |
+| `oracle-trivadis-ptbr` | 2.0.0 | Trivadis Guidelines 4.4 — nomenclatura e revisão de código | 7K |
+| `oracle-devops-ptbr` | 3.1.0 | Git, CI/CD, changelog Oracle, deploy Python + oracledb | 47K |
 
-A skill aplica 11 princípios em todo código gerado:
-
-0. **SQL puro antes de PL/SQL** (princípio Tim Hall — SQL > PL/SQL quando possível)
-1. **Bind variables sempre** (nunca concatenação de valores em SQL dinâmico)
-2. **BULK em loops PL/SQL** (BULK COLLECT + FORALL)
-3. **Exception com contexto** (`lc_nome_unidade` propagado em `raise_application_error`)
-4. **ROLLBACK explícito** em handlers de procedures que fazem DML
-5. **Logger em vez de DBMS_OUTPUT** para produção
-6. **Privilégios mínimos** (separação owner/app user)
-7. **Auditabilidade** (`criado_em`, `criado_por`, `atualizado_em`, `atualizado_por`, soft delete)
-8. **NOCOPY para LOB/collection grande** em IN OUT/OUT
-9. **Triggers não contêm regra de negócio**
-10. **Quando usar trigger, sempre compound trigger**
-11. **EBR para mudanças de schema com zero downtime**
-
-## Convenção de nomes
-
-- **Nomes em PT-BR** sempre que possível: `clientes`, `faturas`, `id_fatura`, `valor_total`, `processar_pagamento`
-- **Prefixos Trivadis em inglês** (convenção do padrão): `g_`, `gc_`, `l_`, `lc_`, `p_`, `r_`, `t_`, `co_`, `e_`
-- **Keywords Oracle em inglês obrigatoriamente**: `BEGIN`, `EXCEPTION`, `BULK COLLECT`, `MERGE INTO`, etc.
-- **Pacotes Oracle nativos não traduzidos**: `DBMS_LOB`, `APEX_JSON`, `OWA_UTIL`, `UTL_HTTP`
-- **Status values em PT-BR**: `'PENDENTE'`, `'PAGO'`, `'CANCELADO'`, `'PROCESSADO'`, `'VENCIDO'`, `'ATIVO'`
+---
 
 ## Instalação
 
-### Para uso pessoal no Claude.ai (Pro/Team/Enterprise)
+### Via arquivo `.skill` (Claude.ai)
 
-1. Baixe o arquivo `.skill` da [aba Releases](../../releases) deste repositório (procurar `oracle-sql-helper-ptbr-v6.skill`)
-2. Em Claude.ai, vá em **Settings → Capabilities → Skills**
-3. Faça upload do arquivo `.skill`
-4. A skill ativa automaticamente quando você menciona termos Oracle inequívocos (PL/SQL, APEX, ORDS, etc.)
+1. Baixe os arquivos `.skill` da pasta [`dist/`](./dist/)
+2. No Claude.ai → **Settings** → **Skills** → arraste ou clique em **Upload**
+3. Repita para cada skill desejada
 
-### Para uso via API
+### Stack completa (recomendado)
 
-A skill pode ser usada como referência para construir prompts de sistema customizados em integrações via API. O conteúdo da `SKILL.md` e referências serve como base de conhecimento.
-
-## Estrutura do repositório
-
-```
-oracle-sql-helper-ptbr/
-├── SKILL.md                              # Frontmatter + princípios + convenções
-├── assets/                               # Templates SQL prontos para clonar
-│   ├── README.md                         # Índice dos templates
-│   ├── package_header.sql
-│   ├── package_body.sql
-│   ├── exception_template.sql
-│   ├── bulk_processing_template.sql
-│   ├── dml_alternatives_to_plsql.sql
-│   ├── nocopy_for_lobs.sql
-│   ├── clob_blob_operations.sql
-│   ├── logger_integration.sql
-│   ├── triggers_canonicos.sql
-│   ├── apex_*.sql                        # 6 templates APEX
-│   ├── ords_*.sql                        # 2 templates ORDS
-│   ├── flashback_query.sql
-│   ├── session_management.sql
-│   ├── recompile_invalid_objects.sql
-│   ├── explain_plan_workflow.sql
-│   └── index_strategy_examples.sql
-└── references/                           # Documentos de referência
-    ├── plsql-trivadis-guidelines.md
-    ├── apex-patterns.md
-    ├── ords-rest-services.md
-    ├── dba-operations.md
-    ├── performance-tuning.md
-    └── ebr-editioning-views.md
+```bash
+# Baixar todos os .skill e instalar um por um
+dist/oracle-plsql-ptbr.skill
+dist/oracle-apex-ptbr.skill
+dist/oracle-ords-ptbr.skill
+dist/oracle-dba-ptbr.skill
+dist/oracle-tuning-ptbr.skill
+dist/oracle-trivadis-ptbr.skill
+dist/oracle-devops-ptbr.skill
 ```
 
-## Estatísticas
+---
 
-- **22 templates SQL** prontos para uso
-- **6 references** com conceitos e padrões
-- **11 princípios canônicos**
-- ~110 KB total descompactado
-- ~300 KB de conteúdo técnico em comentários e exemplos
+## Quando cada skill é ativada
 
-## Histórico de versões
+### oracle-plsql-ptbr
+`BULK COLLECT` · `FORALL` · `NOCOPY` · `EXECUTE IMMEDIATE` · `MERGE INTO` · compound trigger · EBR · CLOB/BLOB · Logger · package · procedure · function
 
-| Versão | Mudanças principais |
-|---|---|
-| **v6** (abr/2026) | +3 princípios canônicos (#9, #10, #11); +template `triggers_canonicos.sql`; +reference `ebr-editioning-views.md` (Edition-Based Redefinition para zero downtime) |
-| v5 (mar/2026) | Inversão de naming inglês→PT-BR em massa; preserva prefixos Trivadis em inglês |
-| v4 (mar/2026) | Auditoria com Oracle-Base/Tim Hall; princípio #0 (SQL > PL/SQL); +`dml_alternatives_to_plsql.sql`; +`nocopy_for_lobs.sql` |
-| v3 (mar/2026) | Auditoria rigorosa; 5 templates novos; 7 princípios canônicos formalizados; 21 antipatterns |
-| v2 (mar/2026) | Logger OraOpenSource; DBMS_ASSERT em ORDS; APEX_BACKGROUND_PROCESS para 24.2 |
-| v1 (mar/2026) | Versão inicial |
+```
+"Criar um package para processar pagamentos"
+"Refatorar esse loop para BULK COLLECT"
+"Como usar EBR para deploy sem downtime?"
+```
 
-## Skill complementar
+### oracle-apex-ptbr
+APEX · Dynamic Action · Interactive Report · Interactive Grid · Page Process · AJAX Callback · `APEX_APPLICATION_*` · `APEX_WORKSPACE_*` · Workflows · AI configs · JSON Sources
 
-Para Oracle AI Database 26ai (features 23ai/26ai como Vector Search, JSON Relational Duality, RAFT replication), use a skill paralela: [oracle-26ai-helper-ptbr](https://github.com/maxwbh/oracle-26ai-helper-ptbr).
+```
+"Como auditar a paginação dos meus IRs?"
+"Diferença entre Page Process e Dynamic Action"
+"Como verificar pages sem authorization scheme?"
+```
 
-## Padrão de referência
+### oracle-ords-ptbr
+ORDS · `define_module` · `define_handler` · AutoREST · OAuth · `ORDS_SECURITY` · JWT · PAR · `USER_ORDS_*` · `DBA_ORDS_*`
 
-Esta skill é baseada em [Trivadis Coding Guidelines 4.4](https://trivadis.github.io/plsql-and-sql-coding-guidelines/v4.4/), considerado padrão de fato no ecossistema Oracle. Inclui também adoções pontuais do fork [Insum PL/SQL & SQL Coding Guidelines](https://insum-labs.github.io/plsql-and-sql-coding-guidelines/) onde agregam valor (especificamente regras G-7720 sobre triggers sem business logic e G-7730 sobre compound triggers obrigatórios).
+```
+"Criar endpoint REST com autenticação OAuth"
+"Inventário de todos os handlers ORDS"
+"Como migrar do OAUTH depreciado para ORDS_SECURITY?"
+```
 
-## Filosofia
+### oracle-dba-ptbr
+`V$SESSION` · `GV$` · `DBA_*` · `CDB_*` · `DBA_HIST_*` · sessão travada · lock · flashback · recompile · tablespace · SE2 vs EE · Diagnostics Pack
 
-- **PT-BR como idioma principal** — comentários, nomes de domínio (clientes, faturas), status — facilita leitura por equipe brasileira
-- **Trivadis 4.4 como base** — não Insum, não custom; o padrão mais adotado em comunidade Oracle
-- **Tim Hall (Oracle-Base) como referência adicional** — princípio "SQL > PL/SQL" e práticas de NOCOPY
-- **Templates executáveis em `assets/`** — não snippets em markdown, mas SQL real que roda em Oracle 19c+
-- **Anti-patterns documentados antes×depois** — código errado e corrigido lado a lado
+```
+"Quem está bloqueando essa sessão?"
+"Recuperar linha deletada por engano"
+"Qual edição Oracle preciso para usar AWR?"
+```
 
-## Limitações
+### oracle-tuning-ptbr
+explain plan · `V$SQL` · `V$SQLAREA` · AWR em tempo real · ASH · index · hard parse · `DBMS_STATS` · cardinality · hints
 
-- **Foco em Oracle 19c** — features 23ai/26ai estão em skill separada
-- **APEX 24.2** — versões anteriores podem não ter todas as APIs mencionadas
-- **Standard Edition vs Enterprise Edition** — algumas features (Flashback, Partitioning) requerem EE
-- **Português brasileiro** — não é português europeu
+```
+"Essa query está fazendo full scan, como otimizar?"
+"Qual index criar para essa consulta?"
+"Hard parse muito alto no V$SQLAREA"
+```
 
-## Contribuindo
+### oracle-trivadis-ptbr
+Revisão explícita do padrão · prefixos `g_/l_/p_/r_/t_/co_/e_` · naming PT-BR · checklist pré-deploy
 
-Issues e PRs bem-vindos. Se identificar:
-- Anti-patterns não cobertos
-- APIs APEX/ORDS faltantes
-- Erros nos templates
-- Sugestões de naming PT-BR
+```
+"Esse package segue o padrão Trivadis?"
+"Qual prefixo usar para esse cursor?"
+"Checklist Trivadis antes do GMUD"
+```
 
-abra issue descrevendo o caso de uso real.
+> As demais skills aplicam Trivadis automaticamente — `oracle-trivadis-ptbr` é para consultas e revisões explícitas.
 
-## Licença
+### oracle-devops-ptbr
+Estrutura Git · changelog Oracle (`db/changelog.yml` + `db_changelog`) · scripts Python com `oracledb` · GitHub Actions · GMUD naming · export APEX split · versionamento ORDS · `DB_SCHEMA` para deploy via DBA
 
-Apache License 2.0 — veja [LICENSE](LICENSE).
+```
+"Como estruturar meu projeto Oracle no Git?"
+"Script de deploy com changelog versionado"
+"Export do APEX para Git em modo split"
+"Deploy via usuário DBA em schema diferente"
+```
 
-Esta skill é construída sobre o trabalho de:
-- [Trivadis](https://trivadis.github.io/plsql-and-sql-coding-guidelines/) (Roger Troller, Philipp Salvisberg, e demais contribuidores) — padrão original
-- [Insum Solutions](https://insum-labs.github.io/plsql-and-sql-coding-guidelines/) (Rich Soule e equipe) — fork com refinamentos
-- [Oracle-Base](https://oracle-base.com/) (Tim Hall) — princípios e padrões práticos
-- [OraOpenSource Logger](https://github.com/OraOpenSource/Logger) — framework de logging
+---
 
-## Autor
+## Referências cruzadas entre skills
 
-**Maxwell da Silva Oliveira** — Senior Oracle Developer
+```
+oracle-plsql-ptbr  ←→  oracle-trivadis-ptbr    (nomenclatura)
+oracle-plsql-ptbr  ←→  oracle-apex-ptbr         (page process)
+oracle-plsql-ptbr  ←→  oracle-ords-ptbr          (handler logic)
+oracle-dba-ptbr    ←→  oracle-tuning-ptbr        (AWR / performance)
+oracle-apex-ptbr   ←→  oracle-ords-ptbr          (REST consumption)
+oracle-devops-ptbr ←→  oracle-plsql-ptbr         (db/packages/)
+oracle-devops-ptbr ←→  oracle-apex-ptbr          (apex/app_N/)
+oracle-devops-ptbr ←→  oracle-ords-ptbr          (ords/modules/)
+```
+
+---
+
+## Stack coberta
+
+| Tecnologia | Versão | Cobertura |
+|---|---|---|
+| Oracle Database | 19c (LTS) | PL/SQL, SQL, tipos, EBR, Data Dictionary 11g→26ai |
+| Oracle APEX | 24.2 | Development + Data Dictionary (APEX_APPLICATION_* etc.) |
+| Oracle ORDS | 24.4 / 25.x | REST services + Data Dictionary (USER/DBA_ORDS_*) |
+| Trivadis Guidelines | 4.4 | Nomenclatura PT-BR + checklist |
+| Python oracledb | 2.0+ (Thin Mode) | Scripts DevOps sem Oracle Client |
+| GitHub Actions | — | CI/CD com deploy por ambiente e aprovação prod |
+
+---
+
+## oracle-devops-ptbr — Scripts Python
+
+A skill DevOps inclui 7 scripts Python + módulo compartilhado:
 
 - Empresa: M&S do Brasil
 - Sete Lagoas, Minas Gerais, Brasil

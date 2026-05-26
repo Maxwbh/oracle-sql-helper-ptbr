@@ -1,0 +1,23 @@
+# requirements-devops.txt
+# Dependências Python para scripts DevOps Oracle
+# M&S do Brasil LTDA — contato@msbrasil.inf.br
+#
+# Instalar:
+#   pip install -r requirements-devops.txt --break-system-packages
+#
+# Em ambientes virtuais (recomendado localmente):
+#   python -m venv .venv
+#   source .venv/bin/activate   # Linux/macOS
+#   .venv\Scripts\activate      # Windows
+#   pip install -r requirements-devops.txt
+#
+# Em GitHub Actions (Ubuntu):
+#   pip install -r requirements-devops.txt
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Oracle Database driver — Thin Mode (sem Oracle Client)
+# Documentação: https://python-oracledb.readthedocs.io/
+oracledb>=2.0.0
+
+# Parser YAML — para changelog.yml
+PyYAML>=6.0.0

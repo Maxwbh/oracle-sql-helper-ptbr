@@ -1,0 +1,119 @@
+# marketplace.yml
+# Metadados de descoberta para Skills Marketplace
+# M&S do Brasil LTDA — contato@msbrasil.inf.br
+# ─────────────────────────────────────────────────────────────────────────────
+
+collection:
+  name: "oracle-skills-ptbr"
+  display_name: "Oracle Stack PT-BR"
+  description: >
+    7 Skills Claude cobrindo toda a stack Oracle em português:
+    PL/SQL 19c, APEX 24.2, ORDS, DBA operacional, Performance Tuning,
+    Trivadis Guidelines 4.4 e DevOps com Python + oracledb.
+    Desenvolvido para equipes brasileiras que trabalham com Oracle Database.
+  version: "3.1.0"
+  language: "pt-BR"
+  category: "database"
+  tags:
+    - "oracle"
+    - "oracle-database"
+    - "oracle-apex"
+    - "oracle-ords"
+    - "plsql"
+    - "database"
+    - "dba"
+    - "devops"
+    - "brazil"
+    - "portuguese"
+    - "trivadis"
+    - "oracledb"
+    - "python"
+  icon: "🗄️"
+  banner: "docs/assets/banner.png"
+
+  author:
+    name: "Maxwell da Silva Oliveira"
+    email: "contato@msbrasil.inf.br"
+    github: "https://github.com/maxwbh"
+    organization: "M&S do Brasil LTDA"
+    website: "https://msbrasil.inf.br"
+
+  repository: "https://github.com/maxwbh/oracle-skills-ptbr"
+  documentation: "https://maxwbh.github.io/oracle-skills-ptbr"
+  license: "MIT"
+
+  install:
+    type: "skill_file"
+    base_url: "https://github.com/maxwbh/oracle-skills-ptbr/releases/latest/download"
+    files:
+      - "oracle-plsql-ptbr.skill"
+      - "oracle-apex-ptbr.skill"
+      - "oracle-ords-ptbr.skill"
+      - "oracle-dba-ptbr.skill"
+      - "oracle-tuning-ptbr.skill"
+      - "oracle-trivadis-ptbr.skill"
+      - "oracle-devops-ptbr.skill"
+
+skills:
+  - name: "oracle-plsql-ptbr"
+    display_name: "Oracle PL/SQL PT-BR"
+    version: "2.0.0"
+    icon: "🗄️"
+    category: "database"
+    description: "PL/SQL 19c — packages, procedures, LOBs, EBR e Trivadis 4.4"
+    tags: ["oracle", "plsql", "packages", "triggers", "lob", "ebr"]
+    file: "dist/oracle-plsql-ptbr.skill"
+
+  - name: "oracle-apex-ptbr"
+    display_name: "Oracle APEX PT-BR"
+    version: "2.0.0"
+    icon: "⚡"
+    category: "development"
+    description: "APEX 24.2 — development patterns e Data Dictionary completo"
+    tags: ["oracle", "apex", "interactive-report", "interactive-grid", "workflow"]
+    file: "dist/oracle-apex-ptbr.skill"
+
+  - name: "oracle-ords-ptbr"
+    display_name: "Oracle ORDS PT-BR"
+    version: "2.0.0"
+    icon: "🌐"
+    category: "development"
+    description: "ORDS — REST services, OAuth, AutoREST e Data Dictionary"
+    tags: ["oracle", "ords", "rest-api", "oauth", "jwt"]
+    file: "dist/oracle-ords-ptbr.skill"
+
+  - name: "oracle-dba-ptbr"
+    display_name: "Oracle DBA PT-BR"
+    version: "2.0.0"
+    icon: "🛡️"
+    category: "database"
+    description: "DBA operacional — sessões, locks, flashback e Data Dictionary"
+    tags: ["oracle", "dba", "awr", "rac", "flashback"]
+    file: "dist/oracle-dba-ptbr.skill"
+
+  - name: "oracle-tuning-ptbr"
+    display_name: "Oracle Tuning PT-BR"
+    version: "2.0.0"
+    icon: "🚀"
+    category: "database"
+    description: "Performance tuning — explain plan, AWR, ASH e index strategy"
+    tags: ["oracle", "tuning", "performance", "explain-plan", "awr"]
+    file: "dist/oracle-tuning-ptbr.skill"
+
+  - name: "oracle-trivadis-ptbr"
+    display_name: "Oracle Trivadis PT-BR"
+    version: "2.0.0"
+    icon: "📐"
+    category: "development"
+    description: "Trivadis Guidelines 4.4 — nomenclatura e revisão de código"
+    tags: ["oracle", "trivadis", "coding-standards", "naming-conventions"]
+    file: "dist/oracle-trivadis-ptbr.skill"
+
+  - name: "oracle-devops-ptbr"
+    display_name: "Oracle DevOps PT-BR"
+    version: "3.1.0"
+    icon: "⚙️"
+    category: "devops"
+    description: "Git, CI/CD, changelog Oracle, deploy Python + oracledb Thin Mode"
+    tags: ["oracle", "devops", "cicd", "git", "python", "oracledb"]
+    file: "dist/oracle-devops-ptbr.skill"

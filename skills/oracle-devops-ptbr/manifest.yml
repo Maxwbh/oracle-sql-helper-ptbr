@@ -1,0 +1,4 @@
+# manifest.yml — declara o que importar de shared/ durante o build
+shared:
+  assets:
+    - oracle_devops_utils.py

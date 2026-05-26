@@ -1,0 +1,289 @@
+# .github/workflows/deploy.yml
+# CI/CD — Deploy Oracle/APEX/ORDS
+# M&S do Brasil LTDA — contato@msbrasil.inf.br
+#
+# Triggers:
+#   push para develop → deploy em DEV (automático)
+#   push para hom     → deploy em HOM (automático)
+#   push para main    → deploy em PROD (requer aprovação manual)
+#
+# Secrets necessários no GitHub (Settings → Secrets → Actions):
+#   DB_HOST_DEV, DB_HOST_HOM, DB_HOST_PROD
+#   DB_PORT, DB_SERVICE_DEV, DB_SERVICE_HOM, DB_SERVICE_PROD
+#   DB_USER, DB_PASS_DEV, DB_PASS_HOM, DB_PASS_PROD
+#   APEX_WORKSPACE, APEX_APP_ID
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Deploy Oracle/APEX/ORDS
+
+on:
+  push:
+    branches:
+      - develop
+      - hom
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Ambiente de deploy'
+        required: true
+        default: 'dev'
+        type: choice
+        options: [dev, hom, prod]
+
+# Impede deploys paralelos no mesmo ambiente
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+
+  # ─── Resolução de ambiente ─────────────────────────────────────────────────
+
+  setup:
+    name: Configurar ambiente
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+      db_host: ${{ steps.env.outputs.db_host }}
+      db_service: ${{ steps.env.outputs.db_service }}
+    steps:
+      - name: Resolver ambiente pelo branch
+        id: env
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          if [[ "$BRANCH" == "main" ]]; then
+            echo "environment=prod"   >> $GITHUB_OUTPUT
+            echo "db_host=${{ secrets.DB_HOST_PROD }}"    >> $GITHUB_OUTPUT
+            echo "db_service=${{ secrets.DB_SERVICE_PROD }}" >> $GITHUB_OUTPUT
+          elif [[ "$BRANCH" == "hom" ]]; then
+            echo "environment=hom"   >> $GITHUB_OUTPUT
+            echo "db_host=${{ secrets.DB_HOST_HOM }}"     >> $GITHUB_OUTPUT
+            echo "db_service=${{ secrets.DB_SERVICE_HOM }}"  >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev"   >> $GITHUB_OUTPUT
+            echo "db_host=${{ secrets.DB_HOST_DEV }}"     >> $GITHUB_OUTPUT
+            echo "db_service=${{ secrets.DB_SERVICE_DEV }}"  >> $GITHUB_OUTPUT
+          fi
+
+  # ─── Validação de SQL ─────────────────────────────────────────────────────
+
+  validate:
+    name: Validar SQL
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verificar encoding UTF-8
+        run: |
+          echo "Verificando encoding dos arquivos SQL..."
+          find db/ ords/ -name "*.sql" -o -name "*.pks" -o -name "*.pkb" | \
+          while read -r f; do
+            if ! file "$f" | grep -qE "(UTF-8|ASCII)"; then
+              echo "AVISO: encoding suspeito em $f — $(file "$f")"
+            fi
+          done
+          echo "✓ Verificação de encoding concluída"
+
+      - name: Verificar padrão GMUD (scripts pontuais)
+        run: |
+          echo "Verificando nomenclatura de scripts em db/scripts/..."
+          if ls db/scripts/*.sql 2>/dev/null | grep -qvP '^\d{3}_\w+\.sql$'; then
+            echo "ERRO: Scripts em db/scripts/ devem seguir o padrão NNN_nome.sql"
+            ls db/scripts/*.sql | grep -vP '^\d{3}_\w+\.sql$'
+            exit 1
+          fi
+          echo "✓ Nomenclatura GMUD validada"
+
+  # ─── Aprovação para produção ───────────────────────────────────────────────
+
+  approve-prod:
+    name: Aprovação produção
+    runs-on: ubuntu-latest
+    needs: [setup, validate]
+    if: needs.setup.outputs.environment == 'prod'
+    environment:
+      name: producao  # Configurar em Settings → Environments → Required reviewers
+    steps:
+      - name: Aprovação concedida
+        run: echo "Deploy em produção aprovado por ${{ github.actor }}"
+
+  # ─── Deploy do banco ───────────────────────────────────────────────────────
+
+  deploy-db:
+    name: Deploy banco (${{ needs.setup.outputs.environment }})
+    runs-on: ubuntu-latest
+    needs: [setup, validate, approve-prod]
+    if: always() && needs.validate.result == 'success' && (needs.approve-prod.result == 'success' || needs.approve-prod.result == 'skipped')
+    environment:
+      name: ${{ needs.setup.outputs.environment }}
+    env:
+      DB_HOST: ${{ needs.setup.outputs.db_host }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_SERVICE: ${{ needs.setup.outputs.db_service }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASS: ${{ secrets[format('DB_PASS_{0}', upper(needs.setup.outputs.environment))] }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar SQLcl
+        run: |
+          wget -q https://download.oracle.com/otn_software/java/sqldeveloper/sqlcl-latest.zip
+          unzip -q sqlcl-latest.zip -d /opt/sqlcl
+          echo "/opt/sqlcl/sqlcl/bin" >> $GITHUB_PATH
+
+      - name: Instalar dependências Python
+        run: pip install -r requirements-devops.txt
+
+      - name: Aplicar changelog do banco
+        run: |
+          python scripts/apply_changelog.py \
+            --env ${{ needs.setup.outputs.environment }} \
+            --project-root ${{ github.workspace }}
+
+  # ─── Deploy APEX ──────────────────────────────────────────────────────────
+
+  deploy-apex:
+    name: Deploy APEX (${{ needs.setup.outputs.environment }})
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-db]
+    env:
+      DB_HOST: ${{ needs.setup.outputs.db_host }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_SERVICE: ${{ needs.setup.outputs.db_service }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASS: ${{ secrets[format('DB_PASS_{0}', upper(needs.setup.outputs.environment))] }}
+      APEX_WORKSPACE: ${{ secrets.APEX_WORKSPACE }}
+      APEX_APP_ID: ${{ secrets.APEX_APP_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar SQLcl
+        run: |
+          wget -q https://download.oracle.com/otn_software/java/sqldeveloper/sqlcl-latest.zip
+          unzip -q sqlcl-latest.zip -d /opt/sqlcl
+          echo "/opt/sqlcl/sqlcl/bin" >> $GITHUB_PATH
+
+      - name: Instalar dependências Python
+        run: pip install -r requirements-devops.txt
+
+      - name: Import APEX
+        run: |
+          INSTALL="apex/app_${APEX_APP_ID}/install.sql"
+          if [[ -f "$INSTALL" ]]; then
+            sql /nolog << EOF
+          WHENEVER SQLERROR EXIT SQL.SQLCODE
+          connect ${DB_USER}/${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_SERVICE}
+          @${INSTALL}
+          exit
+          EOF
+          else
+            echo "install.sql não encontrado, pulando APEX"
+          fi
+
+  # ─── Deploy ORDS ──────────────────────────────────────────────────────────
+
+  deploy-ords:
+    name: Deploy ORDS (${{ needs.setup.outputs.environment }})
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-apex]
+    env:
+      DB_HOST: ${{ needs.setup.outputs.db_host }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_SERVICE: ${{ needs.setup.outputs.db_service }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASS: ${{ secrets[format('DB_PASS_{0}', upper(needs.setup.outputs.environment))] }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar SQLcl
+        run: |
+          wget -q https://download.oracle.com/otn_software/java/sqldeveloper/sqlcl-latest.zip
+          unzip -q sqlcl-latest.zip -d /opt/sqlcl
+          echo "/opt/sqlcl/sqlcl/bin" >> $GITHUB_PATH
+
+      - name: Instalar dependências Python
+        run: pip install -r scripts/requirements-devops.txt
+
+      - name: Deploy módulos ORDS
+        run: |
+          python scripts/deploy_ords.py \
+            --env ${{ needs.setup.outputs.environment }} \
+            --project-root ${{ github.workspace }}
+
+  # ─── Testes pós-deploy ────────────────────────────────────────────────────
+
+  smoke-test:
+    name: Smoke tests (${{ needs.setup.outputs.environment }})
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-ords]
+    # Verifica estado do changelog após deploy
+    env:
+      ORDS_URL: ${{ secrets.ORDS_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar dependências Python
+        run: pip install -r scripts/requirements-devops.txt
+
+      - name: Verificar changelog aplicado
+        run: |
+          python scripts/apply_changelog.py \
+            --env ${{ needs.setup.outputs.environment }} \
+            --status \
+            --project-root ${{ github.workspace }}
+
+      - name: Smoke test ORDS (healthcheck)
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${ORDS_URL}/_/db-api/stable/database/status")
+          if [[ "$STATUS" != "200" ]]; then
+            echo "ERRO: ORDS não responde corretamente — HTTP ${STATUS}"
+            exit 1
+          fi
+          echo "✓ ORDS respondendo (HTTP 200)"
+
+      - name: Testes Newman (se existirem)
+        run: |
+          if [[ -f "tests/api/collection.json" ]]; then
+            npm install -g newman
+            newman run tests/api/collection.json \
+              --env-var "baseUrl=${ORDS_URL}" \
+              --reporters cli,junit \
+              --reporter-junit-export tests/api/reports/newman-report.xml
+          else
+            echo "Sem collection Newman, pulando testes de API"
+          fi
+
+  # ─── Tag de versão (somente prod) ─────────────────────────────────────────
+
+  tag-release:
+    name: Tag de release
+    runs-on: ubuntu-latest
+    needs: [setup, smoke-test]
+    if: needs.setup.outputs.environment == 'prod'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Criar tag de versão
+        run: |
+          VERSION="v$(date '+%Y.%m.%d')-$(git rev-parse --short HEAD)"
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag -a "${VERSION}" -m "Release automática — deploy prod $(date '+%Y-%m-%d %H:%M')"
+          git push origin "${VERSION}"
+          echo "✓ Tag criada: ${VERSION}"
