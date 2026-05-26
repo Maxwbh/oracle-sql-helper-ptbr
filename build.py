@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-build.py — Build, propagação e empacotamento das oracle-sql-helper-ptbr
+build.py — Build, propagação e empacotamento das oracle-skills-ptbr
 M&S do Brasil LTDA — contato@msbrasil.inf.br
 
 Uso:
@@ -16,7 +16,7 @@ O que este script faz:
     4. Gera dist/checksums.sha256
 
 Estrutura esperada:
-    oracle-sql-helper-ptbr/
+    oracle-skills-ptbr/
     ├── build.py              (este arquivo)
     ├── marketplace.yml
     ├── shared/               (fontes únicas da verdade)
@@ -240,7 +240,7 @@ def verificar(skill_dir: Path) -> list[str]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Build e empacotamento das oracle-sql-helper-ptbr"
+        description="Build e empacotamento das oracle-skills-ptbr"
     )
     parser.add_argument("--skill", default=None,
                         help="Empacotar apenas esta skill (ex: oracle-dba-ptbr)")
@@ -251,7 +251,7 @@ def main() -> None:
     args = parser.parse_args()
 
     log(f"\n{B}{'═'*55}{Z}")
-    log(f"{B}  oracle-sql-helper-ptbr — build.py{Z}")
+    log(f"{B}  oracle-skills-ptbr — build.py{Z}")
     log(f"{B}  M&S do Brasil LTDA — contato@msbrasil.inf.br{Z}")
     log(f"{B}{'═'*55}{Z}\n")
 

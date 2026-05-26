@@ -4,7 +4,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 collection:
-  name: "oracle-sql-helper-ptbr"
+  name: "oracle-skills-ptbr"
   display_name: "Oracle Stack PT-BR"
   description: >
     7 Skills Claude cobrindo toda a stack Oracle em português:
@@ -38,13 +38,13 @@ collection:
     organization: "M&S do Brasil LTDA"
     website: "https://msbrasil.inf.br"
 
-  repository: "https://github.com/maxwbh/oracle-sql-helper-ptbr"
-  documentation: "https://maxwbh.github.io/oracle-sql-helper-ptbr"
+  repository: "https://github.com/maxwbh/oracle-skills-ptbr"
+  documentation: "https://maxwbh.github.io/oracle-skills-ptbr"
   license: "MIT"
 
   install:
     type: "skill_file"
-    base_url: "https://github.com/maxwbh/oracle-sql-helper-ptbr/releases/latest/download"
+    base_url: "https://github.com/maxwbh/oracle-skills-ptbr/releases/latest/download"
     files:
       - "oracle-plsql-ptbr.skill"
       - "oracle-apex-ptbr.skill"
