@@ -1,6 +1,6 @@
 # Changelog
 
-Histórico completo de versões do repositório `oracle-skills-ptbr`.  
+Histórico completo de versões do repositório `oracle-sql-helper-ptbr`.  
 Formato: [Semantic Versioning](https://semver.org/) — `MAJOR.MINOR.PATCH`
 
 ---

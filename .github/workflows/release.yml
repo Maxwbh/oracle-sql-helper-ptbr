@@ -120,9 +120,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: "oracle-skills-ptbr ${{ github.ref_name }}"
+          name: "oracle-sql-helper-ptbr ${{ github.ref_name }}"
           body: |
-            ## oracle-skills-ptbr ${{ github.ref_name }}
+            ## oracle-sql-helper-ptbr ${{ github.ref_name }}
 
             **7 Skills Claude para Oracle em Português**
 

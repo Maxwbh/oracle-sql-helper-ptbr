@@ -1,4 +1,4 @@
-# oracle-skills-ptbr
+# oracle-sql-helper-ptbr
 
 **Skills Claude para Oracle — Stack Completa em Português**
 
@@ -185,7 +185,7 @@ DB_SCHEMA=ms_app       # schema alvo do deploy
 ## Estrutura do repositório
 
 ```
-oracle-skills-ptbr/
+oracle-sql-helper-ptbr/
 ├── README.md
 ├── CHANGELOG.md
 ├── LICENSE
@@ -214,13 +214,13 @@ oracle-skills-ptbr/
 
 ```bash
 # Extrair o ZIP
-unzip oracle-skills-ptbr-v3.1.0-git.zip
+unzip oracle-sql-helper-ptbr-v3.1.0-git.zip
 
-cd oracle-skills-ptbr
+cd oracle-sql-helper-ptbr
 git init
 git add .
-git commit -m "feat: oracle-skills-ptbr v3.1.0 — 7 skills stack Oracle completa"
-git remote add origin https://github.com/maxwbh/oracle-skills-ptbr.git
+git commit -m "feat: oracle-sql-helper-ptbr v3.1.0 — 7 skills stack Oracle completa"
+git remote add origin https://github.com/maxwbh/oracle-sql-helper-ptbr.git
 git push -u origin main
 
 git tag -a v3.1.0 -m "7 skills + devops Python oracledb v3.1.0"
